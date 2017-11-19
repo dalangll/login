@@ -118,9 +118,9 @@ class AuthController extends BaseController
             'refresh_expired_at' => Carbon::now()->addMinutes(config('jwt.refresh_ttl'))->toDateTimeString(),
         ];
         Redis::set($user['sub'],$token);
-        setcookie('login',$token);
+        //setcookie('login',$token);
         LoginToken::create(['sub_id'=>$user['sub'],'token'=>$token]);
-        return response($result,201);
+        return response($result,201)->withCookie('SINGLETOKEN', $token);
     }
     public function getsms(){
        return Redis::get('sms');

@@ -66,8 +66,8 @@ class AppController extends BaseController
         
       }
       public function cookie(Request $request){
-          //setcookie("login","",time()-1);
-          Redis::delete('8');
+          $redis = Redis::connection();
+         return $redis->delete(8);
       }
       public function getcookie(){
          $cookieToken=$_COOKIE['login'];
