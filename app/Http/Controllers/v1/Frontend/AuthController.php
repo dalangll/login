@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\v1\Frontend;
 
+use App\Models\LoginRecord;
 use Illuminate\Http\Request;
 use App\Http\Controllers\v1\Frontend\BaseController;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -12,6 +13,7 @@ use Dingo\Api\Routing\Helpers;
 use App\Models\Member;
 use App\Models\LoginToken;
 use Carbon\Carbon;
+use App\Models\LoginRecord as Record;
 use Illuminate\Support\Facades\Redis;
 class AuthController extends BaseController
 {
@@ -107,7 +109,16 @@ class AuthController extends BaseController
         $user = json_decode(base64_decode(explode('.', $token)[1]), true);
 
         $member = Member::find($user['sub']);
-      
+        /*判断该用户是否以封禁*/
+        if($member->hongli_lock==true){
+            abort('该账号以封禁，请联系客服');
+        };
+        /*登录记录*/
+        $loginrecord = [
+            'uid'=>$member->id,
+            'login_time'=>Carbon::now()
+        ];
+        Record::create($loginrecord);
          /*组装数据*/
         $result['data'] = [
             'id' => $user['sub'],

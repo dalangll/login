@@ -23,9 +23,12 @@ $api->version('v1',['namespace'=>'App\Http\Controllers\V1\Frontend'],function($a
 
   
   $api->post('sendsms','AppController@send');//发送短信
-  $api->get('getsms','AuthController@getsms');
+  $api->get('getip','AppController@getIps');
     $api->get('getcookie','AppController@getcookie');
-    $api->get('setcookie','AppController@cookie');
+    /*用户上次登录时间*/
+    $api->get('getlasttime','UserController@getLoginTime');
+
+
     $api->get('testyy',function(){
         $arr = [
             'a'=>1,
@@ -37,14 +40,12 @@ $api->version('v1',['namespace'=>'App\Http\Controllers\V1\Frontend'],function($a
     });
 
     /*商品分类管理*/
-   $api->group(['prefix' => 'sso', 'middleware' => 'SsoMiddleware'],function($api){
-
-       $api->get('testy',function(){
-          return 123456;
-       });
+   $api->group(['prefix' => 'category'],function($api){
+       $api->post('create','AppController@asd');
+       $api->get('getaddress','AppController@aoliaddress');
    });
 
-
+$api->get('lock/{id}','UserController@lock');
 
 });
 

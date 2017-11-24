@@ -37,7 +37,9 @@ class RouteServiceProvider extends ServiceProvider
     {
         $this->mapApiRoutes();
 
-        $this->mapWebRoutes();
+        $this->mapV1FrontendRoutes();
+        $this->mapV1BackendRoutes();
+        $this->mapV1CommonRoutes();
 
         //
     }
@@ -69,5 +71,38 @@ class RouteServiceProvider extends ServiceProvider
              ->middleware('api')
              ->namespace($this->namespace)
              ->group(base_path('routes/api.php'));
+    }
+
+    /**
+     * 定义V1版本的前台API接口路由
+     *
+     * @return void
+     */
+    protected function mapV1FrontendRoutes()
+    {
+        Route::namespace($this->namespace)
+            ->group(base_path('routes/v1/frontend.php'));
+    }
+
+    /**
+     * 定义V1版本的后台API接口路由
+     *
+     * @return void
+     */
+    protected function mapV1BackendRoutes()
+    {
+        Route::namespace($this->namespace)
+            ->group(base_path('routes/v1/backend.php'));
+    }
+
+    /**
+     * 定义V1版本的公用API接口路由
+     *
+     * @return void
+     */
+    protected function mapV1CommonRoutes()
+    {
+        Route::namespace($this->namespace)
+            ->group(base_path('routes/v1/commend.php'));
     }
 }
