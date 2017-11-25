@@ -15,6 +15,9 @@ use App\Models\LoginToken;
 use Carbon\Carbon;
 use App\Models\LoginRecord as Record;
 use Illuminate\Support\Facades\Redis;
+use Mail;
+use App\Jobs\SendEmail;
+
 class AuthController extends BaseController
 {
 	use RegistersUsers;
@@ -110,9 +113,14 @@ class AuthController extends BaseController
 
         $member = Member::find($user['sub']);
         /*判断该用户是否以封禁*/
-        if($member->hongli_lock==true){
+        if($member->lock==true){
             abort('该账号以封禁，请联系客服');
         };
+
+        /*判断用户是否激活*/
+        if($member->status==false){
+            abort('该账号还未激活');
+        }
         /*登录记录*/
         $loginrecord = [
             'uid'=>$member->id,
@@ -143,5 +151,82 @@ class AuthController extends BaseController
         Auth::logout();
         /*返回空响应*/
         return $this->response->noContent();
+    }
+
+    /*testMail*/
+    public function testMail(Request $request){
+        /*数据验证字段*/
+        $validator = Validator::make($request->all(),[
+            'username'=>'required',
+            'email'=>'required|email',
+            'password'=>'required|between:6,20',
+
+        ],[
+            'username.required'=>'用户名不能为空',
+            'email.required'=>'邮箱不能为空',
+            'email.email' => '邮箱格式错误',
+            'password.required'=>'密码不能为空',
+        ]);
+        /*对mobile进行验证*/
+        $email = $request->get('email');
+        $validator->after(function ($validator) use ($email) {
+            if ($email) {
+                if (Member::where('email', '=', $email)->count()) {
+                    $validator->errors()->add('email', '该邮箱以注册');
+                }
+            }
+        });
+
+        /*数据验证失败*/
+        if($validator->fails()){
+            throw new StoreResourceFailedException("Validation Error", $validator->errors());
+        }
+        $uuid = $this->uuid();
+
+        /*获取数据*/
+        $data = [
+            'username'=>$request->get('username'),
+            'email'=>$email,
+            'password'=>bcrypt($request->get('password')),
+            'uuid'=>$uuid
+        ];
+        /*写入数据表*/
+        $user = Member::create($data);
+
+
+
+       /*Mail::later(5,'mail', ['user'=>$user,'uuid'=>$uuid], function ($m) use ($user) {
+           $m->to($user->email)->subject('注册激活');
+       });*/
+
+        $job=(new SendEmail($user))->onQueue('vip')->delay(20);
+        dispatch($job);
+
+        return '邮件队列发送成功';
+    }
+
+    public function activateMail(Request $request){
+       echo $request->getRequestUri();
+    }
+
+    /*账号激活*/
+
+    public function act(Request $request){
+      $id = $request->get('uid');
+      $uuid = $request->get('uuid');
+
+        $user = Member::find($id);
+        if($uuid !=$user->uuid ){
+            abort('403','非法操作');
+        }
+        if($user->status == true && $uuid==$user->uuid ){
+            return '该账号已激活，不用重复激活';
+        }
+        $user->status = true;
+        $user->save();
+
+        return '激活成功';
+
+
     }
 }

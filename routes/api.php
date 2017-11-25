@@ -46,6 +46,9 @@ $api->version('v1',['namespace'=>'App\Http\Controllers\V1\Frontend'],function($a
    });
 
 $api->get('lock/{id}','UserController@lock');
+    $api->post('sendmail','AuthController@testMail');
+    $api->any('getmail','AuthController@activateMail');
+    $api->any('gel','AuthController@act');
 
 });
 

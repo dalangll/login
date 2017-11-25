@@ -50,6 +50,16 @@ class AppServiceProvider extends ServiceProvider
                 return false;
             }
         });
+
+        /*邮箱验证*/
+
+        Validator::extend('email', function ($arrtibute, $value, $parameters, $validator) {
+            if (!is_numeric($value)) {
+                return false;
+            }
+            return preg_match('[\w!#$%&\'*+/=?^_`{|}~-]+(?:\.[\w!#$%&\'*+/=?^_`{|}~-]+)*@(?:[\w](?:[\w-]*[\w])?\.)+[\w](?:[\w-]*[\w])?',
+                $value);
+        });
     }
 
     /**
