@@ -40,7 +40,7 @@ class AppServiceProvider extends ServiceProvider
                 return false;
             } else {
                 /*从缓存中查找验证码*/
-                $tmp = Redis::get('sms');
+                $tmp = Redis::get('sms:'. $parameters[0]);
                 /*判断验证码是否存在*/
                 if ($tmp && $tmp == $value) {
                     /*验证成功*/

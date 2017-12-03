@@ -12,6 +12,10 @@
 */
 
 Route::get('/', function () {
+    return 132;
     return view('welcome');
 });
 Route::get('asd','app\Http\v1\AuthController@act');
+
+
+Route::get('/submit','app\Http\Controller\v1\Frontend\AppController@testlogin');

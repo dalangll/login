@@ -13,29 +13,37 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Cookie;
 use Response;
 use GuzzleHttp\Client;
-
+use App\Jobs\MyJob;
 
 class AppController extends BaseController
 {
     /*发送短信验证码*/
     public function send(Request $request)
     {
-        $mobile = $request->get('mobile');
+         $data = $request->all();
+
+       // $ciphertext = $request->get('original_plaintext');
+         //$mobile=implode('|',$ciphertext);
+        return $data = $data['original_plaintext'];
+
         $code = rand(1000, 9999);
+
         $sms = app(AliSms::class);
-        $sms->sendSms($mobile, 'SMS_92580003', ['number' => $code]);
+        $sms->sendSms($ciphertext, 'SMS_92580003', ['number' => $code]);
         /*验证码存入redis，过期时间为5分钟*/
-        Redis::set('sms', $code, 'EX', 300);
-        return $code;
+        Redis::set('sms:'.$ciphertext, $code, 'EX', 300);
+
+       return $code;
 
     }
+
 
     /*刷新token*/
     public function refreshToken()
     {
         /*获取refresh_token*/
         $member = JWTAuth::user();
-        return $member->id;
+
         $refreshToken = $this->getrefreshtoken($member->id);
 
         /*解密refresh_token*/
@@ -113,7 +121,7 @@ class AppController extends BaseController
 
     function GetIpLookup($ip = '')
     {
-        $ip = '58.218.205.87';
+        $ip = '183.14.133.47';
         if (empty($ip)) {
 
             $ip = GetIp();
@@ -159,17 +167,29 @@ class AppController extends BaseController
 
 
 
-    /*获取IP*/
-    public function testip(Request $request)
-    {
-        $ip = $request->getClientIp();
-        return $ip;
-    }
+
+        public function distance()
+        {
+            $lat1='28.2340227593';
+            $lat2='22.5485544122';
+            $lng1='112.9453203518';
+            $lng2='114.0661345267';
+            //将角度转为狐度
+            $radLat1 = deg2rad($lat1);//deg2rad()函数将角度转换为弧度
+            $radLat2 = deg2rad($lat2);
+            $radLng1 = deg2rad($lng1);
+            $radLng2 = deg2rad($lng2);
+            $a = $radLat1 - $radLat2;
+            $b = $radLng1 - $radLng2;
+            $s = 2*asin(sqrt(pow(sin($a/2),2)+cos($radLat1)*cos($radLat2)*pow(sin($b/2),2)))*6371;
+            return round($s,1);
+        }
+
 
     public function aoliaddress()
     {
 
-        $ip = '10.0.2.2';
+        $ip = '112.97.63.14';
 
         $aliaddress = "http://ip.taobao.com/service/getIpInfo.php?ip=$ip";
 
@@ -189,9 +209,15 @@ class AppController extends BaseController
         /*判断结果是否为空*/
         if ($result['code'] == 0) {
             /*返回组装的ip和地址*/
-            return $result['data']['country'] . ',' . $result['data']['city'] . ',' . $result['data']['region'] . ',' . $result['data']['ip'];
+            return $result['data']['country'] . ',' . $result['data']['region'] . ',' . $result['data']['city'] . ',' . $result['data']['ip'];
         }
     }
+
+    public function testlogin(Request $request){
+        return $request->all();
+    }
+
+
 
 
 }

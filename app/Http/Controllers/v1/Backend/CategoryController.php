@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Validator;
+use Illuminate\Support\Facades\Crypt;
 use Dingo\Api\Exception\StoreResourceFailedException;
 
 class CategoryController extends BaseController
@@ -13,6 +14,9 @@ class CategoryController extends BaseController
     /*新建分类*/
     public function create(Request $request){
 
+       /* $data = $request->all();
+        $info = $data['original_plaintext'];
+        $info = explode('|',$info);*/
         $validator = Validator::make($request->all(),[
             'category_name'=>'required',
             'order'=>'required',
@@ -73,10 +77,53 @@ class CategoryController extends BaseController
     }
     /*分类列表*/
     public function show(){
-         $result = Category::select('id','category_name','order','status','created_at','updated_at')->orderBy('order','desc')->get();
-
+        $plaintext = Category::select('id','category_name','order','status','created_at','updated_at')->orderBy('order','desc')->get();
+       return $data = Crypt::encrypt($plaintext);
+       return $jsdata = Crypt::decrypt($data);
         /*返回数据*/
-        return $result;
+        return  $this->reAec($plaintext);
+
+    }
+
+    public function getidd(){
+       /* $key = 'gdfgdfgdsdfsf===';
+        $plaintext = "message to be encrypted";
+        $ivlen = openssl_cipher_iv_length($cipher="AES-128-CBC");
+        $iv = openssl_random_pseudo_bytes($ivlen);
+        $ciphertext_raw = openssl_encrypt($plaintext, $cipher, $key, $options=OPENSSL_RAW_DATA, $iv);
+        $hmac = hash_hmac('sha256', $ciphertext_raw, $key, $as_binary=true);
+        $ciphertext = base64_encode( $iv.$hmac.$ciphertext_raw );
+         echo $ciphertext.'<br>';*/
+//decrypt later....
+        $key = env('APP_KEY');
+        $ciphertext= $this->show();
+        $c = base64_decode($ciphertext);
+        $ivlen = openssl_cipher_iv_length($cipher="AES-128-CBC");
+        $iv = substr($c, 0, $ivlen);
+        $hmac = substr($c, $ivlen, $sha2len=32);
+        $ciphertext_raw = substr($c, $ivlen+$sha2len);
+        $original_plaintext = openssl_decrypt($ciphertext_raw, $cipher, $key, $options=OPENSSL_RAW_DATA, $iv);
+        $calcmac = hash_hmac('sha256', $ciphertext_raw, $key, $as_binary=true);
+        if (hash_equals($hmac, $calcmac))//PHP 5.6+ timing attack safe comparison
+        {
+            return $original_plaintext;
+        }
+    }
+
+    //convert object to array
+    function object_to_array($obj){
+        if(is_array($obj)){
+            return $obj;
+        }
+        $_arr = is_object($obj)? get_object_vars($obj) :$obj;
+            $arr = [];
+        foreach ($_arr as $key => $val){
+            $val=(is_array($val)) || is_object($val) ? object_to_array($val) :$val;
+            $arr[$key] = $val;
+        }
+
+        return $arr;
+
     }
 
 

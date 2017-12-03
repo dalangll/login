@@ -4,5 +4,5 @@
 return [
     'access_key'        => env('ALIYUN_SMS_AK'), // accessKey
     'access_secret'     => env('ALIYUN_SMS_AS'), // accessSecret
-    'sign_name'         => env('ALIYUN_SMS_SIGN_NAME','罗永浪'), // 签名
+    'sign_name'         => env('ALIYUN_SMS_SIGN_NAME','红狸'), // 签名
 ];

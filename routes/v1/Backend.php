@@ -8,8 +8,9 @@ $api->version('v1', ['namespace' => 'App\Http\Controllers\V1\Backend'], function
 
     $api->group(['prefix'=>'admin'],function ($api){
     /*商品分类*/
-    $api->group(['prefix'=>'category'],function ($api){
+    $api->group(['prefix'=>'category','middleware'=>'AesMiddleware'],function ($api){
         $api->post('create','CategoryController@create');
+        $api->get('getidd','CategoryController@getidd');
         $api->post('update/{id}','CategoryController@update');
         $api->get('show','CategoryController@show');
 

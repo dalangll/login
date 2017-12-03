@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
 use Crypt;
+use Mrgoon\AliSms\AliSms;
 use Dingo\Api\Routing\Helpers;
 class BaseController extends Controller
 {
@@ -44,7 +45,29 @@ class BaseController extends Controller
 
 
 
+    /*异地登录短信通知*/
+    public function sendInform($mobile,$name,$time,$address)
+    {
+
+        $sms = app(AliSms::class);
+        $sms->sendSms($mobile, 'SMS_114070177', ['name' => $name,'time'=>$time,'address'=>$address]);
+        if(!$sms){
+            return '发送失败，请稍后重试';
+        }
 
 
+    }
 
+    /*返回加密数据*/
+    public function reAec($data){
+        $key = env('APP_KEY');
+        $new= implode('|',$data);
+        $ivlen = openssl_cipher_iv_length($cipher="AES-128-CBC");
+        $iv = openssl_random_pseudo_bytes($ivlen);
+        $ciphertext_raw = openssl_encrypt($new, $cipher, $key, $options=OPENSSL_RAW_DATA, $iv);
+        $hmac = hash_hmac('sha256', $ciphertext_raw, $key, $as_binary=true);
+        return $ciphertext = base64_encode( $iv.$hmac.$ciphertext_raw );
+
+
+    }
 }

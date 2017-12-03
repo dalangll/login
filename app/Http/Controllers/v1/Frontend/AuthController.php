@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\v1\Frontend;
 
-use App\Models\LoginRecord;
+use App\Models\MemberInfo;
 use Illuminate\Http\Request;
 use App\Http\Controllers\v1\Frontend\BaseController;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -16,7 +16,7 @@ use Carbon\Carbon;
 use App\Models\LoginRecord as Record;
 use Illuminate\Support\Facades\Redis;
 use Mail;
-use App\Jobs\SendEmail;
+use App\Jobs\SendJob;
 
 class AuthController extends BaseController
 {
@@ -62,10 +62,17 @@ class AuthController extends BaseController
         ];
         /*写入数据表*/
         $user = Member::create($data);
+        $member_info = [
+            'member_id'=>$user->id,
+            'ip'=>getIp(),
+            'address'=>getAddress()
+
+        ];
+       $memberinfo = MemberInfo::create($member_info);
 
         if(!$user){
             abort(500,'注册用户失败，请稍后尝试');
-        }else{
+        }elseif($user && $memberinfo){
              $info = [
                  'date'=>[
 		            'id'=>$user->id,
@@ -82,23 +89,28 @@ class AuthController extends BaseController
 
      /*登录*/
     public function login(Request $request){
-    		/*数据验证字段*/
-       $validator = Validator::make($request->all(),[
-       	 
-          'mobile'=>'required|between:11,11',
-          'password'=>'required|between:6,20',
 
-       	],[
-    
-          'mobile.required'=>'手机号码不能为空',
-          'password.required'=>'密码不能为空',
-       	]);
-    	
-          /*数据验证失败*/
-        if($validator->fails()){
-            throw new StoreResourceFailedException("Validation Error", $validator->errors());
-        }
-       
+
+
+            /*数据验证字段*/
+            $validator = Validator::make($request->all(), [
+
+                'mobile' => 'required|between:11,11',
+                'password' => 'required|between:6,20',
+
+            ], [
+
+                'mobile.required' => '手机号码不能为空',
+                'password.required' => '密码不能为空',
+
+            ]);
+
+            /*数据验证失败*/
+            if ($validator->fails()) {
+                throw new StoreResourceFailedException("Validation Error", $validator->errors());
+            }
+
+
         /*获取数据*/
         $info = [
         'mobile' => $request->get('mobile'),
@@ -107,20 +119,62 @@ class AuthController extends BaseController
         if(!$token=JWTAuth::attempt($info)){
         	  $this->response->errorUnauthorized('用户账户或者密码错误');
         }
-         
+
+        /*当前地区*/
+        $ipAddress = getAddress();
+        /*分隔出城市*/
+        $ipAddress = explode(',',$ipAddress);
+        $ipAddress = $ipAddress['2'];
+        /*获得上次登录地址*/
+        $address = Member::leftjoin('member_info','member.id','=','member_info.member_id')->where('member.mobile','=',$request->get('mobile'))->select('member_info.address')->get()->toArray();
+        /*转换为字符串*/
+        $last_addrees=$address['0']['address'];
+
+
+        $time = Carbon::now()->toDateTimeString();
+
          /*解析出用户id*/ 
         $user = json_decode(base64_decode(explode('.', $token)[1]), true);
 
         $member = Member::find($user['sub']);
+
         /*判断该用户是否以封禁*/
         if($member->lock==true){
             abort('该账号以封禁，请联系客服');
         };
 
-        /*判断用户是否激活*/
-        if($member->status==false){
-            abort('该账号还未激活');
+        if($ipAddress != $last_addrees){
+            $validator = Validator::make($request->all(),[
+                'sms' => 'required|sms:' . $request->get('mobile'),
+            ],[
+                'sms.required' => '短信验证码不能为空',
+                'sms.sms' => '短信验证码错误',
+            ]);
+            /*数据验证失败*/
+            if ($validator->fails()) {
+                throw new StoreResourceFailedException("Validation Error", $validator->errors());exit;
+            }
+
         }
+        if($ipAddress != $last_addrees){
+            /*发送异地登录通知短信*/
+            $this->sendInform($member->mobile,$member->username,$time,$ipAddress);
+        }
+
+        /*用户登录信息*/
+        $member_info = [
+            'member_id'=>$user['sub'],
+            'login_time'=>$time,
+            'ip'=>getIp(),
+            'address'=>$ipAddress
+        ];
+        MemberInfo::where('member_id',$user['sub'])->update($member_info);
+
+
+        /*判断用户是否激活*/
+       /* if($member->status==false){
+            abort('该账号还未激活');
+        }*/
         /*登录记录*/
         $loginrecord = [
             'uid'=>$member->id,
@@ -193,14 +247,7 @@ class AuthController extends BaseController
         /*写入数据表*/
         $user = Member::create($data);
 
-
-
-       /*Mail::later(5,'mail', ['user'=>$user,'uuid'=>$uuid], function ($m) use ($user) {
-           $m->to($user->email)->subject('注册激活');
-       });*/
-
-        $job=(new SendEmail($user))->onQueue('vip')->delay(20);
-        dispatch($job);
+        dispatch(new SendJob($user));
 
         return '邮件队列发送成功';
     }
@@ -220,7 +267,7 @@ class AuthController extends BaseController
             abort('403','非法操作');
         }
         if($user->status == true && $uuid==$user->uuid ){
-            return '该账号已激活，不用重复激活';
+            return '该账号已激活，无需重复激活';
         }
         $user->status = true;
         $user->save();

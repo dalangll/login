@@ -22,33 +22,33 @@ $api->version('v1',['namespace'=>'App\Http\Controllers\V1\Frontend'],function($a
   $api->get('newtoken','AppController@refreshToken');//刷新token
 
   
-  $api->post('sendsms','AppController@send');//发送短信
+  $api->get('sendsms','BaseController@sendInform');//发送通知短信
+  $api->group(['middleware' => 'AesMiddleware'],function ($api){
+      $api->post('sendinfo','AppController@send');//发送短信
+  });
+
   $api->get('getip','AppController@getIps');
+    $api->get('getaddress','AppController@aoliaddress');
     $api->get('getcookie','AppController@getcookie');
     /*用户上次登录时间*/
     $api->get('getlasttime','UserController@getLoginTime');
+    $api->get('testredis','AppController@testip');
 
 
-    $api->get('testyy',function(){
-        $arr = [
-            'a'=>1,
-            'b'=>2,
-            'c'=>3
-        ];
 
-        return $arr['a'];
-    });
 
-    /*商品分类管理*/
-   $api->group(['prefix' => 'category'],function($api){
-       $api->post('create','AppController@asd');
-       $api->get('getaddress','AppController@aoliaddress');
-   });
-
+   /*邮件*/
 $api->get('lock/{id}','UserController@lock');
     $api->post('sendmail','AuthController@testMail');
     $api->any('getmail','AuthController@activateMail');
     $api->any('gel','AuthController@act');
+
+    $api->get('getaddre','AppController@getDistance');
+
+    $api->get('getaec','CategoryController@postAec');
+    $api->get('/',function (){
+        return view('login');
+    });
 
 });
 

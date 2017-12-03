@@ -58,5 +58,6 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'SsoMiddleware' => \App\Http\Middleware\SsoMiddleware::class,
         'AuthMiddleware'=>\App\Http\Middleware\AuthMiddleware::class,
+        'AesMiddleware'=>\App\Http\Middleware\AesMiddleware::class,
     ];
 }

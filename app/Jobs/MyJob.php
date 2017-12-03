@@ -2,27 +2,27 @@
 
 namespace App\Jobs;
 
-use App\Models\Member;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Mail;
+use Illuminate\Support\Facades\Redis;
 
-class SendEmail implements ShouldQueue
+class MyJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-    protected $user;
-
+    private $key;
+    private $value;
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(Member $user)
+    public function __construct($key, $value)
     {
-        $this->user=$user;
+        $this->key = $key;
+        $this->value = $value;
     }
 
     /**
@@ -32,11 +32,10 @@ class SendEmail implements ShouldQueue
      */
     public function handle()
     {
-       $user=$this->user;
-      $uuid = $user->uuid;
-
-        Mail::send('mail', ['user'=>$user,'uuid'=>$uuid], function ($m) use ($user) {
-            $m->to($user->email)->subject('注册激活');
-        });
+        Redis::hset('queue.test', $this->key, $this->value);
+    }
+    public function failed()
+    {
+        dump('failed');
     }
 }
