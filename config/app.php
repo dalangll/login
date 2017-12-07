@@ -179,6 +179,7 @@ return [
         Dingo\Api\Provider\LaravelServiceProvider::class,
         Tymon\JWTAuth\Providers\LaravelServiceProvider::class,
         Mrgoon\AliSms\ServiceProvider::class,
+        Yansongda\LaravelPay\PayServiceProvider::class,
 
     ],
 
@@ -229,6 +230,7 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
         'JWTAuth' => Tymon\JWTAuth\Facades\JWTAuth::class,
+        'Pay' => Yansongda\LaravelPay\Facades\Pay::class,
 
     ],
 

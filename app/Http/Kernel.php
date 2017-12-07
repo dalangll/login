@@ -59,5 +59,6 @@ class Kernel extends HttpKernel
         'SsoMiddleware' => \App\Http\Middleware\SsoMiddleware::class,
         'AuthMiddleware'=>\App\Http\Middleware\AuthMiddleware::class,
         'AesMiddleware'=>\App\Http\Middleware\AesMiddleware::class,
+        'TestMiddleware'=>\App\Http\Middleware\TestMiddleware::class,
     ];
 }

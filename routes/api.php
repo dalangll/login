@@ -16,13 +16,7 @@ $api = app('Dingo\Api\Routing\Router');
 
 $api->version('v1',['namespace'=>'App\Http\Controllers\V1\Frontend'],function($api){
  // 用户认证
-  $api->post('register', 'AuthController@register');//注册
-  $api->post('login', 'AuthController@login');//登录
-  $api->get('logout', 'AuthController@destroy');//退出登录
-  $api->get('newtoken','AppController@refreshToken');//刷新token
 
-  
-  $api->get('sendsms','BaseController@sendInform');//发送通知短信
   $api->group(['middleware' => 'AesMiddleware'],function ($api){
       $api->post('sendinfo','AppController@send');//发送短信
   });
@@ -49,6 +43,11 @@ $api->get('lock/{id}','UserController@lock');
     $api->get('/',function (){
         return view('login');
     });
+
+    /*pay*/
+   $api->any('pay','PayController@pay');
+   $api->any('verfly','PayController@verfly');
+   $api->any('notifly','PayController@notifly');
 
 });
 

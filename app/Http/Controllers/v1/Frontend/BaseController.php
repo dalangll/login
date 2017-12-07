@@ -61,12 +61,14 @@ class BaseController extends Controller
     /*返回加密数据*/
     public function reAec($data){
         $key = env('APP_KEY');
-        $new= implode('|',$data);
+        $jsondata = json_encode($data);
+
         $ivlen = openssl_cipher_iv_length($cipher="AES-128-CBC");
         $iv = openssl_random_pseudo_bytes($ivlen);
-        $ciphertext_raw = openssl_encrypt($new, $cipher, $key, $options=OPENSSL_RAW_DATA, $iv);
+        $ciphertext_raw = openssl_encrypt($jsondata, $cipher, $key, $options=OPENSSL_RAW_DATA, $iv);
         $hmac = hash_hmac('sha256', $ciphertext_raw, $key, $as_binary=true);
         return $ciphertext = base64_encode( $iv.$hmac.$ciphertext_raw );
+
 
 
     }

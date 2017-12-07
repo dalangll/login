@@ -232,9 +232,5 @@ class GoodsController extends BaseController
             abort(500,'重置价格失败');
         }
     }
-    /*修改商品排序*/
-    public function setOrder(){
-
-    }
 
 }

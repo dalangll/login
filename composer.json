@@ -12,7 +12,8 @@
         "laravel/tinker": "~1.0",
         "mrgoon/aliyun-sms": "dev-master",
         "predis/predis": "^1.1",
-        "tymon/jwt-auth": "1.0.*@dev"
+        "tymon/jwt-auth": "1.0.*@dev",
+        "yansongda/laravel-pay": "^1.0"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",

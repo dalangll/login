@@ -8,25 +8,26 @@ $api->version('v1', ['namespace' => 'App\Http\Controllers\V1\Backend'], function
 
     $api->group(['prefix'=>'admin'],function ($api){
     /*商品分类*/
-    $api->group(['prefix'=>'category','middleware'=>'AesMiddleware'],function ($api){
-        $api->post('create','CategoryController@create');
-        $api->get('getidd','CategoryController@getidd');
-        $api->post('update/{id}','CategoryController@update');
-        $api->get('show','CategoryController@show');
+    $api->group(['prefix'=>'category','middleware'=>'api.throttle','limit' => 5, 'expires' => 1],function ($api){
 
+        $api->post('create','CategoryController@create');//创建分类
+        $api->post('update/{id}','CategoryController@update');//修改分类
+        $api->get('show','CategoryController@show');//分类列表
 
     });
     /*商品*/
     $api->group(['prefix'=>'goods'],function ($api){
-        $api->post('create','GoodsController@add');
-        $api->post('update/{id}','GoodsController@update');
-        $api->get('show','GoodsController@listgoods');
-        $api->delete('delete/{id}','GoodsController@delete');
-        $api->get('copy/{id}','GoodsController@copygood');
-        $api->post('reset/{id}','GoodsController@resetPrice');
+
+        $api->post('create','GoodsController@add');//添加商品
+        $api->post('update/{id}','GoodsController@update');//更新修改商品
+        $api->get('show','GoodsController@listgoods');//商品列表
+        $api->delete('delete/{id}','GoodsController@delete');//删除商品
+        $api->get('copy/{id}','GoodsController@copygood');//复制新建商品
+        $api->post('reset/{id}','GoodsController@resetPrice');//重置商品价格
 
 
     });
+
 
     });
 

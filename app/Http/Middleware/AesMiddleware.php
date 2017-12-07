@@ -15,32 +15,34 @@ class AesMiddleware
      */
     public function handle($request, Closure $next)
     {
-         $key = env('APP_KEY');
-          $ciphertext= $request->all();
-          Crypt::decrypt($ciphertext['category_name']);
+        /*获取客户端提交数据*/
+         $ciphertext= $request->all();
+         //dd(is_array($ciphertext));
+         /*如果是get请求没提交数据等直接下一步*/
+         if(empty($ciphertext)){
 
-        if(count($ciphertext)==0){
-            return $next($request);
-        }
-
-         $str= implode('|',$ciphertext);
-         $c = base64_decode($str);
-
-         $ivlen = openssl_cipher_iv_length($cipher="AES-128-CBC");
-         $iv = substr($c, 0, $ivlen);
-         $hmac = substr($c, $ivlen, $sha2len=32);
-         $ciphertext_raw = substr($c, $ivlen+$sha2len);
-         $decryption = openssl_decrypt($ciphertext_raw, $cipher, $key, $options=OPENSSL_RAW_DATA, $iv);
-         $calcmac = hash_hmac('sha256', $ciphertext_raw, $key, $as_binary=true);
-         if (hash_equals($hmac, $calcmac))//PHP 5.6+ timing attack safe comparison
-         {
-
-             $request->merge(compact('decryption'));
              return $next($request);
          }
+         $dataes = $ciphertext['category_name'];
+        /*将数据解密*/
+        $key = env('APP_KEY');
+        $c = base64_decode($dataes);
+        $ivlen = openssl_cipher_iv_length($cipher="AES-128-CBC");
+        $iv = substr($c, 0, $ivlen);
+        $hmac = substr($c, $ivlen, $sha2len=32);
+        $ciphertext_raw = substr($c, $ivlen+$sha2len);
+        $decryption = openssl_decrypt($ciphertext_raw, $cipher, $key, $options=OPENSSL_RAW_DATA, $iv);
+        $calcmac = hash_hmac('sha256', $ciphertext_raw, $key, $as_binary=true);
+        if (hash_equals($hmac, $calcmac))
+        {
+
+            $goodsdata = json_decode($decryption,true);
+            $request->attributes->add(compact('goodsdata'));
+            return $next($request);
+        }
     }
 
-    public function terminate($request, $response){
+         public function terminate($request, $response){
 
 
     }
