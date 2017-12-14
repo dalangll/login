@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Validator;
 use App\Models\DricetGoods;
-class GoodsController extends Controller
+class GoodsController extends BaseController
 {
 
 
@@ -80,7 +80,7 @@ class GoodsController extends Controller
             /*得到数据*/
             $data = $builder->paginate(15);
 
-            return $this->dataResponse($data);
+           return $this->dataResponse($data);
     }
 
 

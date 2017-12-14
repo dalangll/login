@@ -9,7 +9,7 @@ use App\Models\Member;
 use JWTAuth;
 use DB;
 
-class UserController extends Controller
+class UserController extends BaseController
 {
   /*封禁用户账号*/
   public function lock(Request $request,$id){

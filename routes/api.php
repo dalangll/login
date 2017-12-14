@@ -49,5 +49,7 @@ $api->get('lock/{id}','UserController@lock');
    $api->any('verfly','PayController@verfly');
    $api->any('notifly','PayController@notifly');
 
+    $api->get('path','TestController@testpath');
+    $api->get('model','PayController@model');
 });
 

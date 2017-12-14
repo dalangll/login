@@ -30,7 +30,9 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Tests\\": "tests/"
+            "Tests\\": "tests/",
+            "Hongli\\Alipay\\": "packsdk/hongli/alipay/src/hongli/alipay/"
+
         },
         "files": [
             "app/helpers.php"

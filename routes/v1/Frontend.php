@@ -26,7 +26,10 @@ $api->version('v1', ['namespace' => 'App\Http\Controllers\V1\Frontend'], functio
     $api->group(['prefix'=>'app'],function ($api){
         $api->post('sendinfo','AppController@send');//发送短信
     });
-    /**/
+    /*支付*/
+    $api->group(['prefix'=>'pay'],function ($api){
+        $api->get('getpayf','AlipayController@alipayf');
+    });
 
 
 });

@@ -6,7 +6,7 @@ return [
         'app_id' => '2016090900469591',
 
         // 支付宝异步通知地址
-        'notify_url' => 'https://openapi.alipaydev.com/gateway.do',
+        'notify_url' => 'http://dalang.s1.natapp.cc/api/notifly',
 
         // 支付成功后同步通知地址
         'return_url' => 'http://dalang.s1.natapp.cc/api/verfly',

@@ -120,7 +120,7 @@ return [
     |
     */
 
-    'log' => env('APP_LOG', 'single'),
+    'log' => env('APP_LOG', 'daily'),
 
     'log_level' => env('APP_LOG_LEVEL', 'debug'),
 
@@ -180,6 +180,7 @@ return [
         Tymon\JWTAuth\Providers\LaravelServiceProvider::class,
         Mrgoon\AliSms\ServiceProvider::class,
         Yansongda\LaravelPay\PayServiceProvider::class,
+        \Hongli\Alipay\ServiceProvider::class,
 
     ],
 
@@ -231,6 +232,7 @@ return [
         'View' => Illuminate\Support\Facades\View::class,
         'JWTAuth' => Tymon\JWTAuth\Facades\JWTAuth::class,
         'Pay' => Yansongda\LaravelPay\Facades\Pay::class,
+        'Alipay' => \Hongli\Alipay\facades\Alipay::class,
 
     ],
 
